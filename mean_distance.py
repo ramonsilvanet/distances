@@ -36,6 +36,5 @@ for index, row in labels.iterrows():
 
 print("IMAGENET Imagens", len(labels_list))
 
-print(len(nouns_list) * len(labels_list))
 
 print("Finalizado")

@@ -35,16 +35,12 @@ for k, v in labels.iterrows():
         labels_vectors.append(model[label])
     else:
         print(label, "nao existe")
-		
-distances = euclidean_distances(nouns_vectors, labels_vectors)
 
-print("Distances", distances.shape)
+
+tam_i = len(nouns_vectors)
+tam_j = len(labels_vectors)
 
 print("Liberando memoria...")
-del nouns_vectors[:]
-del labels_vectors[:]
-
-tam_i, tam_j = distances.shape
 
 dataset = []
 
@@ -52,12 +48,11 @@ for i in range(0, tam_i):
     print("Processando", nouns['vqa_img_id'][i])
     dataset = []
     for j in range(0, tam_j):
-        
-        if distances[i,j] > 2.5:
-            continue
-        
-        print([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], distances[i,j]])
-        dataset.append([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], distances[i,j]])
+        distance = euclidean_distances([nouns_vectors[i]], [labels_vectors[j]])       
+        if distance[0] > 1:
+            continue        
+        print([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], distance[0]])
+        dataset.append([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], distance[0]])
 
     df = pd.DataFrame(dataset)
     df.to_csv(os.path.join(DATA_DIR, "bboxes_imagenet", 'dist_calc_new.csv'), mode='a', index=0, header=0)
