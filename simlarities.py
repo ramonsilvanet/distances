@@ -14,8 +14,8 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 model = gensim.models.KeyedVectors.load_word2vec_format(VECTORS_FILE, binary=True)
 model.accuracy(WORDS_FILE)
 
-labels = pd.read_csv(os.path.join(DATA_DIR, "label_all_new.csv"), names=['imagenet_img_id', 'label'], header=0)
-nouns = pd.read_csv(os.path.join(DATA_DIR, "vqa_nouns.csv"), names=['vqa_img_id', 'question_id', 'noun'], header=0)
+labels = pd.read_csv(os.path.join(DATA_DIR, "label_all_100.csv"), names=['imagenet_img_id', 'label'], header=0)
+nouns = pd.read_csv(os.path.join(DATA_DIR, "vqa_nouns_100.csv"), names=['vqa_img_id', 'question_id', 'noun'], header=0)
 
 print("Processando distancias")
 
@@ -44,22 +44,21 @@ print("Liberando memoria...")
 
 dataset = []
 cache  = {}
-for i in range(0, tam_i):
 
+for i in range(0, tam_i):
     if nouns['vqa_img_id'] in cache:
         continue
-
-    print("Processando", nouns['vqa_img_id'][i])
-    dataset = []
     
+    print("Processando", nouns['vqa_img_id'][i])
     cache[nouns['vqa_img_id']] = 1
     
+    dataset = []
     for j in range(0, tam_j):
-        distance = euclidean_distances([nouns_vectors[i]], [labels_vectors[j]])       
+        similarity = model.similarity(nouns['noun'][i], labels['label'][j])       
         if distance[0] > 1:
             continue        
-        print([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], distance[0,0]])
-        dataset.append([labels['imagenet_img_id'][j], int(nouns['question_id'][i]), labels['label'][j], nouns['noun'][i], distance[0,0]])
+        print([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], similarity])
+        dataset.append([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], similarity])
 
     df = pd.DataFrame(dataset)
     df.to_csv(os.path.join(DATA_DIR, "bboxes_imagenet", 'dist_calc_new.csv'), mode='a', index=0, header=0)

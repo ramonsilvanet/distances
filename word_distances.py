@@ -18,7 +18,7 @@ nouns_vectors = []
 nouns_vectors.append( model["dog"] )
 
 labels_vectors = []
-labels_vectors.append(model["item"])
+labels_vectors.append(model["frisbee"])
 
 distances = euclidean_distances(nouns_vectors, labels_vectors)
 
