@@ -23,3 +23,6 @@ labels_vectors.append(model["frisbee"])
 distances = euclidean_distances(nouns_vectors, labels_vectors)
 
 print(distances)
+
+print("Cat -> Cat", model.similarity("Cat", "Cat"))
+print("dog -> frisbee", model.similarity("dog", "frisbee"))

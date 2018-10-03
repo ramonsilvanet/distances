@@ -14,8 +14,17 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 model = gensim.models.KeyedVectors.load_word2vec_format(VECTORS_FILE, binary=True)
 model.accuracy(WORDS_FILE)
 
-labels = pd.read_csv(os.path.join(DATA_DIR, "label_all_100.csv"), names=['imagenet_img_id', 'label'], header=0)
-nouns = pd.read_csv(os.path.join(DATA_DIR, "vqa_nouns_100.csv"), names=['vqa_img_id', 'question_id', 'noun'], header=0)
+labels = pd.read_csv(os.path.join(DATA_DIR, "label_all_new.csv"), names=['imagenet_img_id', 'label'], header=0)
+nouns = pd.read_csv(os.path.join(DATA_DIR, "vqa_nouns.csv"), names=['vqa_img_id', 'question_id', 'noun'], header=0)
+
+def change_word(word):
+    if word.lower() == "tv/monitor":
+        return "tv"
+    elif word.lower() == "potted plant":
+        return "plant"
+    else:
+        return word.lower()
+
 
 print("Processando distancias")
 
@@ -46,22 +55,26 @@ dataset = []
 cache  = {}
 
 for i in range(0, tam_i):
-    if nouns['vqa_img_id'] in cache:
+    img_id = nouns['vqa_img_id'][i]
+
+    if img_id in cache:
         continue
-    
-    print("Processando", nouns['vqa_img_id'][i])
-    cache[nouns['vqa_img_id']] = 1
-    
+
+    print("Processando", img_id)
     dataset = []
+    
+    cache[img_id] = 1
+
     for j in range(0, tam_j):
-        similarity = model.similarity(nouns['noun'][i], labels['label'][j])       
-        if distance[0] > 1:
-            continue        
-        print([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], similarity])
-        dataset.append([labels['imagenet_img_id'][j], nouns['question_id'][i], labels['label'][j], nouns['noun'][i], similarity])
+        noun = change_word(nouns['noun'][i])
+        label = change_word(labels['label'][j])
+        similarity = model.similarity(noun, label)
+
+        print([labels['imagenet_img_id'][j], nouns['question_id'][i], label, noun, similarity])
+        dataset.append([labels['imagenet_img_id'][j], nouns['question_id'][i], label, noun, similarity])
 
     df = pd.DataFrame(dataset)
-    df.to_csv(os.path.join(DATA_DIR, "bboxes_imagenet", 'dist_calc_new.csv'), mode='a', index=0, header=0)
+    df.to_csv(os.path.join(DATA_DIR, "bboxes_imagenet", 'similarities.csv'), mode='a', index=0, header=0)
 
 
 print("Finalizado")

@@ -46,13 +46,15 @@ dataset = []
 cache  = {}
 for i in range(0, tam_i):
 
-    if nouns['vqa_img_id'] in cache:
+    img_id = nouns['vqa_img_id'][i]
+
+    if img_id in cache:
         continue
 
-    print("Processando", nouns['vqa_img_id'][i])
+    print("Processando", img_id)
     dataset = []
     
-    cache[nouns['vqa_img_id']] = 1
+    cache[img_id] = 1
     
     for j in range(0, tam_j):
         distance = euclidean_distances([nouns_vectors[i]], [labels_vectors[j]])       
